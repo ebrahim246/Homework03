@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Favorite Movies</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="container">
+    <h1>Quiz</h1>
+    <div class="alert alert-light">
+      <button onClick="finishQuiz(event)" class="float-end">X</button>
+      Timer: <h3 id='countdown'></h3>
+    </div>
+    <div id='quizPage' class="card">
+      <form id="questionBox" class="card-body">
+        
+      </form>
+      <div id='answerResponse' class="card-footer alert-secondary">
+        Please select 
+      </div>
+    </div>
+    <div id='scorePage' class="card d-none">
+      Score 
+    </div>
+  </div>
+
+
+  
+<script type="text/javascript">
+ 
+  var countdownTimer
+  var countdownValue 
+  var questionNum
+  var correct1
+  var correct3
+
+  var highscores = JSON.parse(window.localStorage.getItem("highscores")) || [];
+ 
+  highscores.sort(function(a, b) {
+    return b.score - a.score;
+  });
+  highscores.forEach(function(score) {
+ 
+    var liTag = document.createElement("li");
+    liTag.textContent = score.initials + " - " + score.score;
+   
+    var olEl = document.getElementById("highscores");
+    olEl.appendChild(liTag);
+  });
+
+
+  var questions = [
+    { question1: "Which one of these is an actor?", 
+      answers: [ "Michael Wong", "Siyuan Huo", "Cyril Gayola", "Brad Pitt" ],
+      correct1: "Brad Pitt" }, 
+      
+    { question2: "Which of the following is a fruit?", 
+      answers: [ "Water", "Carrots", "Mango" ],
+      correct: "Mango" },
+    { question3: "Which is Marvel character?",
+      answers: [ "Ironman", "Superman", "Batman" ],
+      correct3: "Ironman" }
+  ]
+  
+
+  function showNextQuestion(){
+    var question = questions[questionNum]
+    var questionEl = document.querySelector('#questionBox')
+   
+    questionEl.innerHTML = `
+      <div class="alert alert-warning"><h3>${question.question}</h3>
+      `
+   
+    for( var i=0; i < question.answers.length; i++ ){
+      var answer = question.answers[i]
+      questionEl.innerHTML += `
+      <button onClick="selectAnswer(event,'${answer}')" class="btn btn-secondary btn-block">${answer}</button>
+      `
+    }
+  }
+
+  function selectAnswer( event,answer ){
+    event.preventDefault()
+    console.log( `question answer id: ${answer}` )
+    if( answer===questions[questionNum].correct ){
+      console.log( `good job! correct answer: ${answer}` )
+    } else {
+      console.log( `sorry mate, you loose, -10` )
+      timerDecreaseAndDisplay(10)
+    }
+    questionNum++
+   
+    if( questionNum<questions.length )
+      showNextQuestion()
+    else
+      finishQuiz()
+  }
+
+  function timerDecreaseAndDisplay( byValue=1 ){
+   
+    countdownValue -= byValue
+    document.querySelector('#countdown').textContent = countdownValue
+    if( countdownValue<1 )
+      finishQuiz()
+  }
+
+  function showPage( page ){
+  
+    document.querySelector('#quizPage').classList.add('d-none')
+    document.querySelector('#scorePage').classList.add('d-none')
+    
+    document.querySelector(`#${page}`).classList.remove('d-none')
+  }
+
+  function finishQuiz(event){
+    if( event ) event.preventDefault()
+    console.log( `finished` )
+  
+    clearInterval( countdownTimer )
+   
+    showPage( 'scorePage' )
+  }
+
+ 
+  function startQuiz(){
+    questionNum = 0
+    countdownValue = 60
+    countdownTimer = setInterval( timerDecreaseAndDisplay, 1000 )
+    showPage( 'quizPage' )
+    showNextQuestion()
+  }
+  startQuiz()
+
+</script>
+
+</body>
+
+</html>
+
